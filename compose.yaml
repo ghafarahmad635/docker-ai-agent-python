@@ -1,0 +1,36 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: DockerFile
+    ports:
+      - "8080:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 
+    volumes:
+      - ./backend/src:/app
+    environment:
+      - PORT=8000
+      - MY_PROJECT=Hello World
+    env_file:
+      - .env.sample
+    develop:
+      watch:
+        - action: rebuild
+          path: backend/requirements.txt
+
+        - action: rebuild
+          path: backend/Dockerfile
+
+        - action: restart
+          path: ./backend/src
+
+  static_html:
+    build: 
+      context: ./static_html
+      dockerfile: static.DockerFile
+    ports:
+      - "8000:8000"
+      - "3000:8000"
+    command: python -m http.server 8000
+    volumes:
+      - ./static_html/src:/app
