@@ -6,4 +6,4 @@ if( not API_KEY):
 app=FastAPI()
 @app.get("/")
 def read_root():
-    return {"Hello! You  Ghafar": "World "}
+    return {"Hello! You  Ghafar": f"World {API_KEY}"}
