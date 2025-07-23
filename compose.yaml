@@ -22,7 +22,7 @@ services:
           path: backend/Dockerfile
 
         - action: restart
-          path: ./backend/src
+          path: /backend/src
 
   static_html:
     build: 
