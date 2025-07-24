@@ -11,7 +11,14 @@ if not DATABASE_URL:
 
 # If someone still uses postgres:// fix it
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://", "postgresql+psycopg://", 1
+    )
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgresql://", "postgresql+psycopg://", 1
+    )
+
 
 # engine with pre_ping so dead connections are recycled
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
