@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
+from typing import List
 from pydantic import ConfigDict
 from sqlmodel import DateTime, Field, Relationship, SQLModel
-from typing import List
+
 def get_utc_now():
     """
     Returns the current UTC datetime.
@@ -42,14 +43,27 @@ class ChatMessage(SQLModel, table=True):
 
 
 
+class ChatMessagesRecent(SQLModel):
+    message: str
+    
+    created_at: datetime | None = Field(
+        default_factory=get_utc_now,
+        sa_type=DateTime(timezone=True),
+        nullable=True,
+        primary_key=False,
+    )
+
+    # enable parsing from ORM attributes
+    model_config = ConfigDict(from_attributes=True)
+    
+    
 class AIChatResponseRead(SQLModel):
     subject:    str
     contents:   str
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-
-
+    
 class ChatMessagesWithResponse(SQLModel):
     message:    str
     created_at: datetime
