@@ -18,8 +18,8 @@ class AIChatResponse(SQLModel, table=True):
     subject:       str
     contents:      str
     is_response:   bool                  = Field(default=True)
-    created_at:    datetime | None       = Field(
-        default_factory=lambda: datetime.now(tz=datetime.timezone.utc),
+    created_at: datetime | None = Field(
+        default_factory=get_utc_now,
         sa_type=DateTime(timezone=True),
     )
 
