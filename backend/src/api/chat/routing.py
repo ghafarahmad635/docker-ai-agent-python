@@ -29,9 +29,9 @@ def create_chat_message(
     
     obj=ChatMessage.model_validate(data)
     session.add(obj)
-    # session.commit()
+    session.commit()
     # session.refresh(obj)
-    response=generate_email_message(obj.message)
+    response=generate_email_message(payload.message)
     # return {"message": f"Chat created successfully {payload.message}", "id": obj.id, "is_response": obj.is_response, "email": response}
     return response
 
