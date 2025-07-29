@@ -3,6 +3,8 @@ from sqlmodel import Session, select
 from api.chat.model import ChatMessagePayload, ChatMessage, ChatMessagesRecent
 from api.db import get_session
 from typing import List
+from api.ai.services import generate_email_message
+from api.ai.schema import EmailMessageSchema
 router = APIRouter()
 
 @router.get("/")
@@ -12,7 +14,7 @@ def chat_health():
     """
     return {"status": "ok"}
 
-@router.post("/",response_model=ChatMessage)
+@router.post("/",response_model=EmailMessageSchema)
 def create_chat_message(
     payload: ChatMessagePayload,
     session:Session = Depends(get_session)
@@ -27,9 +29,11 @@ def create_chat_message(
     
     obj=ChatMessage.model_validate(data)
     session.add(obj)
-    session.commit()
-    session.refresh(obj)
-    return {"message": f"Chat created successfully {obj.message}", "id": obj.id, "is_response": obj.is_response}
+    # session.commit()
+    # session.refresh(obj)
+    response=generate_email_message(obj.message)
+    # return {"message": f"Chat created successfully {payload.message}", "id": obj.id, "is_response": obj.is_response, "email": response}
+    return response
 
 # curl.exe http://localhost:8080/api/chats/recent
 

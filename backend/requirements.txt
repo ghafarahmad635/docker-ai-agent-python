@@ -4,3 +4,5 @@ requests
 sqlmodel
 psycopg[binary]
 python-dotenv
+langchain
+langchain-openai
