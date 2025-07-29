@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
-from api.chat.model import ChatMessagePayload, ChatMessage, ChatMessagesRecent
+from api.chat.model import AIChatResponse, ChatMessagePayload, ChatMessage, ChatMessagesRecent, ChatMessagesWithResponse
 from api.db import get_session
 from typing import List
 from api.ai.services import generate_email_message
 from api.ai.schema import EmailMessageSchema
+from sqlalchemy.orm   import selectinload
+
+
 router = APIRouter()
 
 @router.get("/")
@@ -32,6 +35,17 @@ def create_chat_message(
     session.commit()
     # session.refresh(obj)
     response=generate_email_message(payload.message)
+      # 3. save that AI response in its own table
+    ai_resp = AIChatResponse(
+        chat_message_id=obj.id,
+        subject=response.subject,
+        contents=response.contents,
+    )
+    session.add(ai_resp)
+    session.commit()
+    
+    
+    
     # return {"message": f"Chat created successfully {payload.message}", "id": obj.id, "is_response": obj.is_response, "email": response}
     return response
 
@@ -49,3 +63,18 @@ def get_recent_chat_messages(
     rows = session.exec(stmt).all()
     # model_validate replaces the old from_orm
     return [ChatMessagesRecent.model_validate(row) for row in rows]
+
+
+@router.get("/recent/response", response_model=List[ChatMessagesWithResponse])
+def get_recent_chats_with_responses(
+    session: Session = Depends(get_session),
+):
+    # fetch ChatMessage + its AI replies in one go
+    stmt = (
+        select(ChatMessage)
+        .options(selectinload(ChatMessage.responses))
+        .order_by(ChatMessage.created_at.desc())
+        .limit(10)
+    )
+    msgs = session.exec(stmt).all()
+    return [ChatMessagesWithResponse.model_validate(m) for m in msgs]
